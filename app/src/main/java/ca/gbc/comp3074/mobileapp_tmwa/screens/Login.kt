@@ -44,22 +44,18 @@ fun Login(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
     var userName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Person, // replace with your logo or another Material Icon
+                imageVector = Icons.Default.Person,
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(72.dp)
@@ -76,8 +72,6 @@ fun Login(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
                     .fillMaxWidth(0.9f)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
-                //elevation = CardDefaults.cardElevation(8.dp),
-                //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Column(
@@ -136,9 +130,7 @@ fun Login(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
 @Composable
 @Preview(showBackground = true)
 fun LoginPreview() {
-
     AppTheme(darkTheme = true, dynamicColor = false) {
         Login({}, {})
-
     }
 }

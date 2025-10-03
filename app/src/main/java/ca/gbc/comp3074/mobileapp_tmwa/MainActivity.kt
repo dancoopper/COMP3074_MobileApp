@@ -19,30 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
+import ca.gbc.comp3074.mobileapp_tmwa.domain.model.Screen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.HomePage
 import ca.gbc.comp3074.mobileapp_tmwa.screens.Login
 import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
 import com.example.compose.AppTheme
-
-
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object About : Screen("about")
-    object Contact : Screen("contact")
-    object Login : Screen("login")
-    object Register : Screen("register")
-    object EventForm : Screen("eventform")
-}
-
-val listNavItems = listOf<Screen>(
-    Screen.Home,
-    Screen.Contact,
-    Screen.About,
-    Screen.Login,
-    Screen.Register,
-    Screen.EventForm
-)
-
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -52,16 +33,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme(darkTheme = true, dynamicColor = false) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
                     Column(
-                        modifier = Modifier.padding(top=innerPadding.calculateTopPadding()/2)
+                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding() / 2)
                     ) {
-//                        Spacer(
-//                            modifier = Modifier.height( innerPadding)
-//                        )
-                    MainScreen()
+                        MainScreen()
                     }
-
                 }
             }
         }
@@ -72,29 +48,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.Login.route) {
-        composable(Screen.Home.route) {
-            HomePage(
-                onBack = {navController.popBackStack()},
-                onNewEvent = {navController.navigate(Screen.EventForm.route)}
-            )
+    NavHost(navController = navController, startDestination = Screen.LOGIN.route) {
+        composable(Screen.HOME.route) {
+            HomePage()
         }
-        composable(Screen.EventForm.route){
-            EventForm()
-        }
-        composable(Screen.About.route) { }
-        composable(Screen.Contact.route) { }
-        composable(Screen.Login.route) {
+        composable(Screen.LOGIN.route) {
             Login(
-                onLoginDone = { navController.navigate(Screen.Home.route) },
-                onNavigateToRegister = {navController.navigate(Screen.Register.route)}
+                onLoginDone = { navController.navigate(Screen.HOME.route) },
+                onNavigateToRegister = { navController.navigate(Screen.REGISTER.route) }
             )
         }
-        composable(Screen.Register.route) {
+        composable(Screen.REGISTER.route) {
             RegisterScreen(
-                onRegisterDone = { navController.navigate(Screen.Login.route) },
-
-                )
+                onRegisterDone = { navController.navigate(Screen.LOGIN.route) },
+            )
         }
     }
 }

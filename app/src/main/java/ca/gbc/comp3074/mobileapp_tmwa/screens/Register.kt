@@ -1,6 +1,5 @@
 package ca.gbc.comp3074.mobileapp_tmwa.screens
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,9 +40,6 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
-
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -56,7 +52,7 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Person, // replace with your logo or another Material Icon
+                imageVector = Icons.Default.Person,
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(72.dp)
@@ -73,8 +69,6 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
                     .fillMaxWidth(0.9f)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
-                //elevation = CardDefaults.cardElevation(8.dp),
-                //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Column(

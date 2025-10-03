@@ -61,38 +61,20 @@ import java.time.ZoneId
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage(onBack: () -> Unit, onNewEvent: () -> Unit) {
-
+fun HomePage(
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEventForm by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
-//            TopAppBar(
-//                title = { Text("Home Page") },
-//                navigationIcon = {
-//                    IconButton(onClick = { onBack() }) {
-//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-//                    }
-//                },
-//                actions = {
-//                    IconButton(onClick = { }) {
-//                        Icon(Icons.Default.Search, contentDescription = "Search")
-//                    }
-//                    IconButton(onClick = { showDatePicker = true }) {
-//                        Icon(Icons.Default.DateRange, contentDescription = "Calendar")
-//                    }
-//                }
-//            )
-
             HomeHeader()
-
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showEventForm = !showEventForm }) {
-                if(!showEventForm) {
+                if (!showEventForm) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
-                }else{
+                } else {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Down Arrow")
 
                 }
@@ -255,6 +237,6 @@ fun SidebarList() {
 @Preview(showBackground = true)
 fun HomePreview() {
     AppTheme(darkTheme = true, dynamicColor = false) {
-        HomePage({}, {})
+        HomePage()
     }
 }
