@@ -7,21 +7,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
 import ca.gbc.comp3074.mobileapp_tmwa.domain.model.Screen
-import ca.gbc.comp3074.mobileapp_tmwa.screens.HomePage
-import ca.gbc.comp3074.mobileapp_tmwa.screens.Login
+import ca.gbc.comp3074.mobileapp_tmwa.screens.HomeScreen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.LoginScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
 import com.example.compose.AppTheme
 
@@ -50,10 +46,10 @@ fun MainScreen() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.LOGIN.route) {
         composable(Screen.HOME.route) {
-            HomePage()
+            HomeScreen()
         }
         composable(Screen.LOGIN.route) {
-            Login(
+            LoginScreen(
                 onLoginDone = { navController.navigate(Screen.HOME.route) },
                 onNavigateToRegister = { navController.navigate(Screen.REGISTER.route) }
             )
