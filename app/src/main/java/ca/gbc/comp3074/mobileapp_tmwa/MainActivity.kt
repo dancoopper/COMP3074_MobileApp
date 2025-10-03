@@ -1,47 +1,63 @@
 package ca.gbc.comp3074.mobileapp_tmwa
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import ca.gbc.comp3074.mobileapp_tmwa.ui.theme.MobileApp_TMWATheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import ca.gbc.comp3074.mobileapp_tmwa.domain.model.Screen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.HomeScreen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.LoginScreen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
+import com.example.compose.AppTheme
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MobileApp_TMWATheme {
+            AppTheme(darkTheme = true, dynamicColor = false) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Column(
+                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding() / 2)
+                    ) {
+                        MainScreen()
+                    }
                 }
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MobileApp_TMWATheme {
-        Greeting("Android")
+fun MainScreen() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Screen.LOGIN.route) {
+        composable(Screen.HOME.route) {
+            HomeScreen()
+        }
+        composable(Screen.LOGIN.route) {
+            LoginScreen(
+                onLoginDone = { navController.navigate(Screen.HOME.route) },
+                onNavigateToRegister = { navController.navigate(Screen.REGISTER.route) }
+            )
+        }
+        composable(Screen.REGISTER.route) {
+            RegisterScreen(
+                onRegisterDone = { navController.navigate(Screen.LOGIN.route) },
+            )
+        }
     }
 }
