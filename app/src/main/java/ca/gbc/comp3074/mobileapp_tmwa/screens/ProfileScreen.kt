@@ -77,7 +77,7 @@ fun EditableProfileScreen(onNavigateHome: () -> Unit = {}) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_launcher_background), // <---- Can be edited
+                    painter = painterResource(R.drawable.ic_launcher_background), // <---- Can be edited / replaced
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -126,7 +126,7 @@ fun EditableProfileScreen(onNavigateHome: () -> Unit = {}) {
 
             Spacer(Modifier.height(16.dp))
 
-            // Personal Info
+            // Personal Info (Edit page)
             if (isEditing) {
                 EditSection(
                     dob, gender, profession, email, phone,
@@ -136,7 +136,7 @@ fun EditableProfileScreen(onNavigateHome: () -> Unit = {}) {
                     onEmail = { email = it },
                     onPhone = { phone = it }
                 )
-            } else {
+            } else { // Normal page
                 InfoSectionCompact(
                     title = "Personal Info",
                     info = listOf(
@@ -212,8 +212,8 @@ fun InfoSectionCompact(title: String, info: List<Pair<String, String>>) {
     Spacer(Modifier.height(12.dp))
 }
 
-@Preview(showBackground = true) //Routing
-@Composable
+@Preview(showBackground = true) // preview
+@Composable //Navhost routing
 fun EditableProfilePreview() {
     AppTheme(darkTheme = false, dynamicColor = false) {
         EditableProfileScreen()
