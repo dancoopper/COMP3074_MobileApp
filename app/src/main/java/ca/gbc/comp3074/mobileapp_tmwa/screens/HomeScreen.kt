@@ -51,13 +51,13 @@ import java.time.ZoneId
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onProfileClick: () -> Unit = {}) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEventForm by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
-            HomeHeader()
+            HomeHeader(onProfileClick = onProfileClick)
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showEventForm = !showEventForm }) {
