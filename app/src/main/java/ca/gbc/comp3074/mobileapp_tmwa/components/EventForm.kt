@@ -271,7 +271,10 @@ fun EventFormPreview() {
                     .padding(innerPadding)
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    HomeHeader()
+                    HomeHeader(
+                        onProfileClick = {},
+                        onCalendarClick = {}
+                    )
                 }
 
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {

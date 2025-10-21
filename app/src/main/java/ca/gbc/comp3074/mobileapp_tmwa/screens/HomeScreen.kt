@@ -55,9 +55,13 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEventForm by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            HomeHeader(onProfileClick = onProfileClick)
+            HomeHeader(
+                onProfileClick = onProfileClick,
+                onCalendarClick = { showDatePicker = true }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showEventForm = !showEventForm }) {
@@ -69,11 +73,8 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                 }
             }
         }
-    )
-
-    { innerPadding ->
-        Box() {
-
+    ) { innerPadding ->
+        Box {
             // Date Picker Dialog
             if (showDatePicker) {
                 val datePickerState = rememberDatePickerState()
@@ -101,125 +102,115 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                     DatePicker(state = datePickerState)
                 }
             }
-
-
-
-
-
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                // Top Section
-                Row(modifier = Modifier.weight(1f)) {
-                    // Left Sidebar
-                    SidebarList()
-                    // Main Content
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp)
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer) // light green
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(
-                                    "Green Card",
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer) // light blue
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(
-                                    "Blue Card",
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-
-                // Bottom Section
-                Row(modifier = Modifier.weight(1f)) {
-                    // Left Sidebar
-                    SidebarList()
-                    // Main Content
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp)
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.error) // light red
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Red Card", color = MaterialTheme.colorScheme.onError)
-                            }
-                        }
-
-                        Spacer(Modifier.height(16.dp))
-
-                        Text(
-                            text = "hold and drag",
-                            style = MaterialTheme.typography.bodyMedium,
-                            //color = Color(0xFF1565C0), // blue text
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
-            }
+//
+//            Column(
+//                modifier = Modifier
+//                    .padding(innerPadding)
+//                    .fillMaxSize()
+//            ) {
+//                Row(modifier = Modifier.weight(1f)) {
+//                    SidebarList()
+//                    Column(
+//                        modifier = Modifier
+//                            .weight(1f)
+//                            .padding(8.dp)
+//                    ) {
+//                        Card(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(120.dp),
+//                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer) // light green
+//                        ) {
+//                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                                Text(
+//                                    "Green Card",
+//                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+//                                )
+//                            }
+//                        }
+//                        Spacer(Modifier.height(12.dp))
+//                        Card(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(80.dp),
+//                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer) // light blue
+//                        ) {
+//                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                                Text(
+//                                    "Blue Card",
+//                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+//
+//                // Bottom Section
+//                Row(modifier = Modifier.weight(1f)) {
+//                    // Left Sidebar
+//                    SidebarList()
+//                    // Main Content
+//                    Column(
+//                        modifier = Modifier
+//                            .weight(1f)
+//                            .padding(8.dp)
+//                    ) {
+//                        Card(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(100.dp),
+//                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.error) // light red
+//                        ) {
+//                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                                Text("Red Card", color = MaterialTheme.colorScheme.onError)
+//                            }
+//                        }
+//
+//                        Spacer(Modifier.height(16.dp))
+//
+//                        Text(
+//                            text = "hold and drag",
+//                            style = MaterialTheme.typography.bodyMedium,
+//                            modifier = Modifier.align(Alignment.CenterHorizontally)
+//                        )
+//                    }
+//                }
+//            }
 
             if (showEventForm) {
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {
                     EventForm()
                 }
             }
-
         }
     }
 }
 
 
-@Composable
-fun SidebarList() {
-    Column(
-        modifier = Modifier
-            .width(56.dp) // sidebar width
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        repeat(8) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        RoundedCornerShape(4.dp)
-                    )
-            )
-        }
-    }
-}
-
+//@Composable
+//fun SidebarList() {
+//    Column(
+//        modifier = Modifier
+//            .width(56.dp) // sidebar width
+//            .fillMaxHeight()
+//            .background(MaterialTheme.colorScheme.surfaceVariant),
+//        verticalArrangement = Arrangement.spacedBy(12.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        repeat(8) {
+//            Box(
+//                modifier = Modifier
+//                    .size(32.dp)
+//                    .background(
+//                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+//                        RoundedCornerShape(4.dp)
+//                    )
+//            )
+//        }
+//    }
+//}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

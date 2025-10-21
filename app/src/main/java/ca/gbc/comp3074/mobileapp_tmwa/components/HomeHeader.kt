@@ -27,7 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeHeader(onProfileClick: () -> Unit = {}) {
+fun HomeHeader(
+    onProfileClick: () -> Unit,
+    onCalendarClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,7 +38,6 @@ fun HomeHeader(onProfileClick: () -> Unit = {}) {
             .padding(top=0.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-
     ) {
         Text(
             text = "Today",
@@ -49,13 +51,23 @@ fun HomeHeader(onProfileClick: () -> Unit = {}) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(end=16.dp)
         ) {
+//            IconButton(
+//                onClick = {}
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Filled.Notifications,
+//                    contentDescription = "Notifications",
+//                    tint = MaterialTheme.colorScheme.secondary,
+//                )
+//            }
             IconButton(
-                onClick = {}
+                onClick = onCalendarClick
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Notifications,
-                    contentDescription = "Notifications",
+                    imageVector = Icons.Filled.DateRange,
+                    contentDescription = "Calendar",
                     tint = MaterialTheme.colorScheme.secondary,
                 )
             }
@@ -82,5 +94,8 @@ fun HomeHeader(onProfileClick: () -> Unit = {}) {
 @Preview(showBackground = true)
 @Composable
 fun HomeHeaderPreview() {
-    HomeHeader()
+    HomeHeader(
+        onProfileClick = {},
+        onCalendarClick = {}
+    )
 }
