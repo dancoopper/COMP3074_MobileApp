@@ -7,4 +7,7 @@ enum class Screen(
     HOME(route = "home", title = "Home"),
     LOGIN(route = "login", title = "Login"),
     REGISTER(route = "register", title = "Register"),
+    PROFILE(route = "profile", title = "Profile"),
+
+
 }

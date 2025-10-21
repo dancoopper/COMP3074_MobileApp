@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ca.gbc.comp3074.mobileapp_tmwa.domain.model.Screen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.EditableProfileScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.HomeScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.LoginScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
@@ -46,7 +47,11 @@ fun MainScreen() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.LOGIN.route) {
         composable(Screen.HOME.route) {
-            HomeScreen()
+            HomeScreen(
+                onProfileClick = {
+                    navController.navigate(Screen.PROFILE.route)
+                }
+            )
         }
         composable(Screen.LOGIN.route) {
             LoginScreen(
@@ -57,6 +62,11 @@ fun MainScreen() {
         composable(Screen.REGISTER.route) {
             RegisterScreen(
                 onRegisterDone = { navController.navigate(Screen.LOGIN.route) },
+            )
+        }
+        composable(Screen.PROFILE.route) {
+            EditableProfileScreen(
+                onNavigateHome = { navController.popBackStack(Screen.HOME.route, inclusive = false) }
             )
         }
     }

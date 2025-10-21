@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,7 +65,7 @@ fun HomeHeader() {
                 modifier = Modifier.size(40.dp)
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = onProfileClick,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Icon(
