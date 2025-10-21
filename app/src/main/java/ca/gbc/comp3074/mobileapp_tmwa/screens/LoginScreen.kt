@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,19 +26,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ca.gbc.comp3074.mobileapp_tmwa.data.AuthResult
+import ca.gbc.comp3074.mobileapp_tmwa.data.SupabaseAuth
 import com.example.compose.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
-    var userName by remember { mutableStateOf("") }
+//    var userName by remember { mutableStateOf("") }
+//    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
+    var loading by remember { mutableStateOf(false) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,10 +89,18 @@ fun LoginScreen(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
+//                    OutlinedTextField(
+//                        value = userName,
+//                        onValueChange = { userName = it },
+//                        label = { Text("Username") },
+//                        modifier = Modifier.fillMaxWidth(),
+//                        singleLine = true
+//                    )
+
                     OutlinedTextField(
-                        value = userName,
-                        onValueChange = { userName = it },
-                        label = { Text("Username") },
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -99,13 +116,37 @@ fun LoginScreen(onLoginDone: () -> Unit, onNavigateToRegister: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = onLoginDone,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Login")
+//                    Button(
+//                        onClick = onLoginDone,
+//                        modifier = Modifier.fillMaxWidth(),
+//                        shape = RoundedCornerShape(8.dp)
+//                    ) {
+//                        Text("Login")
+//                    }
+
+                    Button(enabled = !loading, onClick = {
+                        loading = true
+                        errorMsg = null
+                        scope.launch {
+                            when (val res = SupabaseAuth.signIn(email.trim(), password)) {
+                                is AuthResult.Success -> {
+                                    loading = false
+                                    onLoginDone()
+                                }
+                                is AuthResult.Error -> {
+                                    loading = false
+                                    errorMsg = res.message
+                                }
+                            }
+                        }
+                    }) {
+                        if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp)) else Text("Login")
                     }
+                    Text(
+                        text = errorMsg ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                     Spacer(modifier = Modifier.padding())
                     Text("Don't have an Account?")
                     TextButton(
