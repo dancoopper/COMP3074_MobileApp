@@ -1,5 +1,6 @@
 package ca.gbc.comp3074.mobileapp_tmwa.components
 
+import android.R.attr.text
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.*
@@ -59,9 +60,7 @@ fun CustomDateTimePicker(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
-                        val selectedDate = Instant.ofEpochMilli(it)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
+                        val selectedDate = LocalDate.ofEpochDay(it / (24 * 60 * 60 * 1000))
                         val selectedTime = LocalTime.of(
                             timePickerState.hour,
                             timePickerState.minute

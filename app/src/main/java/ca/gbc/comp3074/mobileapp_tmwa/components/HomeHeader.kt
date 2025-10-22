@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun HomeHeader(
+    date: String = "Today",
     onProfileClick: () -> Unit,
     onCalendarClick: () -> Unit,
 ) {
@@ -40,7 +41,7 @@ fun HomeHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Today",
+            text = date,
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif

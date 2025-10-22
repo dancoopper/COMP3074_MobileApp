@@ -1,23 +1,33 @@
 package ca.gbc.comp3074.mobileapp_tmwa.screens
 
+import android.R.attr.startOffset
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,20 +36,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import ca.gbc.comp3074.mobileapp_tmwa.AppDatabase
 import ca.gbc.comp3074.mobileapp_tmwa.components.CustomDatePicker
 import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
 import ca.gbc.comp3074.mobileapp_tmwa.components.HomeHeader
 import ca.gbc.comp3074.mobileapp_tmwa.components.TimeTickIndicator
+import ca.gbc.comp3074.mobileapp_tmwa.dao.EventDao
+import ca.gbc.comp3074.mobileapp_tmwa.domain.model.EventEntity
 import com.example.compose.AppTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.joda.time.format.ISODateTimeFormat.date
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @SuppressLint("DefaultLocale")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -52,7 +73,21 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
 
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
 
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getDatabase(context) }
+    val eventDao = db.eventDao()
+    val coroutineScope = rememberCoroutineScope()
+
+    var eventsForTheDay by remember { mutableStateOf(listOf<EventEntity>()) }
+
+    LaunchedEffect(selectedDate) {
+        selectedDate?.let { date ->
+            eventsForTheDay = getEventInRange(eventDao, date)
+        }
+    }
+
     LaunchedEffect(Unit) {
+        selectedDate = LocalDate.now()
         while (true) {
             currentTime = LocalDateTime.now()
             delay(60_000L)
@@ -62,6 +97,14 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
     Scaffold(
         topBar = {
             HomeHeader(
+                date = selectedDate?.let {
+                    if (it == LocalDate.now()) {
+                        "Today"
+                    } else {
+                        val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, MMM d")
+                        it.format(formatter)
+                    }
+                }.toString(),
                 onProfileClick = onProfileClick,
                 onCalendarClick = { showDatePicker = true }
             )
@@ -72,7 +115,6 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 } else {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Down Arrow")
-
                 }
             }
         },
@@ -82,8 +124,12 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                 show = showDatePicker,
                 onDismissRequest = { showDatePicker = false },
                 onDateSelected = { date ->
+                    Log.d("Date", "Date selected: $date")
                     selectedDate = date
                     showDatePicker = false
+                    coroutineScope.launch {
+                        eventsForTheDay = getEventInRange(eventDao, date)
+                    }
                 }
             )
 
@@ -93,13 +139,7 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                     .padding(innerPadding)
             ) {
                 val totalHeight = maxHeight - 20.dp
-
-                val secondsInDay = (24 * 60 * 60)
-                val elapsedSeconds =
-                    currentTime.hour * 3600 + currentTime.minute * 60 + currentTime.second
-                val timeFraction = elapsedSeconds / secondsInDay.toFloat()
-
-                val lineOffset: Dp = totalHeight * timeFraction + 10.dp
+                val lineOffset: Dp = timeToLineOffset(currentTime, totalHeight)
 
                 Row(
                     modifier = Modifier
@@ -115,7 +155,7 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                             .weight(1f)
                             .padding(start = 16.dp)
                     ) {
-                        Text("$timeFraction")
+
                     }
                 }
 
@@ -123,18 +163,117 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .offset(y = lineOffset),
-                    thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha=0.5f)
                 )
+
+                eventsForTheDay.forEach { event ->
+                    val startLineOffset = timeToLineOffset(event.startDateTime, totalHeight) - 10.dp
+                    val endLineOffset = timeToLineOffset(event.endDateTime, totalHeight) - 10.dp
+                    val height = max(endLineOffset - startLineOffset, 20.dp)
+                    val startOffset = 100.dp
+                    val rectangleWidth = 80.dp
+                    Column(
+                        modifier = Modifier
+                            .offset(x = rectangleWidth + startOffset + 10.dp, y = startLineOffset),
+                    ) {
+                        Text(
+                            text = event.title,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        )
+                        Text(
+                            text = event.description,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .offset(x = startOffset, y = startLineOffset + 4.dp)
+                            .padding(top = 2.dp)
+                            .width(rectangleWidth)
+                            .height(height - 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                when (event.type.lowercase()) {
+                                    "meeting" -> MaterialTheme.colorScheme.primary
+                                    "task" -> MaterialTheme.colorScheme.secondary
+                                    "schedule" -> MaterialTheme.colorScheme.tertiary
+                                    else -> MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            )
+                            .clickable(onClick = {
+                                coroutineScope.launch {
+                                    eventDao.deleteEvent(event)
+                                    eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
+                                }
+                            }),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize().padding(top=2.dp),
+                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = event.type.uppercase(),
+                                color = MaterialTheme.colorScheme.background,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+                }
             }
 
             if (showEventForm) {
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {
-                    EventForm()
+                    EventForm(
+                        onCreateEvent = { formData ->
+                            val event = EventEntity(
+                                title = formData.title,
+                                description = formData.description,
+                                type = formData.type,
+                                startDateTime = formData.startDateTime,
+                                endDateTime = formData.endDateTime,
+                                isRepeat = formData.isRepeat
+                            )
+
+                            coroutineScope.launch {
+                                eventDao.insertEvent(event)
+                                showEventForm = false
+                                eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
+                            }
+                        }
+                    )
                 }
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+suspend fun getEventInRange(eventDao: EventDao, targetDate: LocalDate): List<EventEntity> {
+    val allEvents = eventDao.getAllEvents()
+
+    return allEvents.filter { event ->
+        val start = event.startDateTime.toLocalDate()
+        val end = event.endDateTime.toLocalDate()
+
+        if (event.isRepeat) {
+            val daysBetween = ChronoUnit.DAYS.between(start, targetDate)
+            daysBetween >= 0 && (daysBetween % 7).toInt() == 0
+        } else {
+            !targetDate.isBefore(start) && !targetDate.isAfter(end)
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun timeToLineOffset(currentTime: LocalDateTime, totalHeight: Dp): Dp {
+    val secondsInDay = (24 * 60 * 60)
+    val elapsedSeconds = currentTime.hour * 3600 + currentTime.minute * 60 + currentTime.second
+    val timeFraction = elapsedSeconds / secondsInDay.toFloat()
+    return totalHeight * timeFraction + 10.dp
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

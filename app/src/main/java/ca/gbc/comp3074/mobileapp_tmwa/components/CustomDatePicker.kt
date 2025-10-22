@@ -9,9 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,9 +29,7 @@ fun CustomDatePicker(
             TextButton(onClick = {
                 onDismissRequest()
                 datePickerState.selectedDateMillis?.let {
-                    val selected = Instant.ofEpochMilli(it)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
+                    val selected = LocalDate.ofEpochDay(it / (24 * 60 * 60 * 1000))
                     onDateSelected(selected)
                 }
             }) {

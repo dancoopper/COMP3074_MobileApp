@@ -3,7 +3,6 @@ package ca.gbc.comp3074.mobileapp_tmwa.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,24 +44,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ca.gbc.comp3074.mobileapp_tmwa.domain.model.EventEntity
 import com.example.compose.AppTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-data class EventFormData(
-    val title: String,
-    val description: String,
-    val type: String,
-    val startDateTime: LocalDateTime,
-    val endDateTime: LocalDateTime,
-    val isRepeat: Boolean,
-)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventForm(
-    onCreateEvent: (EventFormData) -> Unit = {},
+    onCreateEvent: (EventEntity) -> Unit,
 ) {
     val templates = listOf("Default", "Task", "Schedule", "Meeting")
     var selectedTemplate by remember { mutableStateOf("Default") }
@@ -280,7 +271,7 @@ fun EventForm(
 
                             if (valid && startDateTime != null && endDateTime != null) {
                                 onCreateEvent(
-                                    EventFormData(
+                                    EventEntity(
                                         title = title,
                                         description = description,
                                         type = type,
@@ -327,7 +318,7 @@ fun EventFormPreview() {
                 }
 
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {
-                    EventForm()
+                    EventForm({})
                 }
             }
         }
