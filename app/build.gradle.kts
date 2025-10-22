@@ -1,4 +1,6 @@
 import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
+import kotlin.apply
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,6 +8,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
 }
+
+
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+val supabaseUrl = localProps.getProperty("SUPABASE_URL")?.trim() ?: ""
+val supabaseKey = localProps.getProperty("SUPABASE_KEY")?.trim() ?: ""
 
 android {
     namespace = "ca.gbc.comp3074.mobileapp_tmwa"
@@ -19,8 +30,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -39,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -64,4 +77,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

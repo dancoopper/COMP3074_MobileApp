@@ -16,7 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ca.gbc.comp3074.mobileapp_tmwa.domain.model.Screen
-import ca.gbc.comp3074.mobileapp_tmwa.screens.EditableProfileScreen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.ProfileScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.HomeScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.LoginScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
@@ -25,7 +25,7 @@ import com.example.compose.AppTheme
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+            super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme(darkTheme = true, dynamicColor = false) {
@@ -65,7 +65,7 @@ fun MainScreen() {
             )
         }
         composable(Screen.PROFILE.route) {
-            EditableProfileScreen(
+            ProfileScreen(
                 onNavigateHome = { navController.popBackStack(Screen.HOME.route, inclusive = false) }
             )
         }
