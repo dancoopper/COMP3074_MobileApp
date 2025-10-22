@@ -157,7 +157,7 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
                             }
                         }
                     }) {
-                        if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp)) else Text("ister")
+                        if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp)) else Text("Register")
                     }
                     Text(
                         text = errorMsg ?: "",

@@ -1,6 +1,5 @@
 package ca.gbc.comp3074.mobileapp_tmwa.screens
 
-import android.R.attr.startOffset
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
@@ -22,12 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,7 +54,6 @@ import ca.gbc.comp3074.mobileapp_tmwa.domain.model.EventEntity
 import com.example.compose.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.joda.time.format.ISODateTimeFormat.date
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
