@@ -1,6 +1,5 @@
 package ca.gbc.comp3074.mobileapp_tmwa.components
 
-import android.R.attr.checked
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -15,37 +14,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,9 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.compose.AppTheme
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun EventTemplateButton(
@@ -73,7 +63,7 @@ fun EventTemplateButton(
                     else MaterialTheme.colorScheme.surfaceDim,
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable(onClick = onClick) // TODO: add this back
+            .clickable(onClick = onClick)
     ) {
         Text(
             text,
@@ -86,15 +76,60 @@ fun EventTemplateButton(
     }
 }
 
+data class EventFormData(
+    val title: String,
+    val description: String,
+    val type: String,
+    val startDateTime: LocalDateTime,
+    val endDateTime: LocalDateTime,
+    val isRepeat: Boolean,
+)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventForm() {
-    val templates = listOf("Default", "Task", "Deadline", "Meeting")
-    var selectedTemplate by remember { mutableIntStateOf(0) }
+fun EventForm(
+    onCreateEvent: (EventFormData) -> Unit = {},
+) {
+    val templates = listOf("Default", "Task", "Schedule", "Meeting")
+    var selectedTemplate by remember { mutableStateOf("Default") }
 
-    var showDatePicker by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+
+    var startDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var endDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
+
+    var isRepeat by remember { mutableStateOf(false) }
+    var type by remember { mutableStateOf("") }
+
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    var titleError by remember { mutableStateOf<String?>(null) }
+    var typeError by remember { mutableStateOf<String?>(null) }
+    var dateError by remember { mutableStateOf<String?>(null) }
+
+    val dateTimerFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy\nhh:mm a")
+
+    LaunchedEffect(selectedTemplate) {
+        type = when (selectedTemplate) {
+            "Default" -> ""
+            else -> selectedTemplate
+        }
+
+        isRepeat = when (selectedTemplate) {
+            "Schedule" -> true
+            "Default" -> isRepeat
+            else -> false
+        }
+    }
+
+    LaunchedEffect(startDateTime) {
+        if (endDateTime == null) {
+            endDateTime = startDateTime
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -107,147 +142,188 @@ fun EventForm() {
             .padding(16.dp),
         contentAlignment = Alignment.TopStart
     ) {
-        // Date Picker Dialog
-        if (showDatePicker) {
-            val datePickerState = rememberDatePickerState()
+        CustomDateTimePicker(
+            show = showStartDatePicker,
+            onDismissRequest = { showStartDatePicker = false },
+            onDateTimeSelected = { startDateTime = it }
+        )
 
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showDatePicker = false
-                        datePickerState.selectedDateMillis?.let {
-                            selectedDate = Instant.ofEpochMilli(it)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                        }
-                    }) {
-                        Text("OK")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text("Cancel")
-                    }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
-        }
+        CustomDateTimePicker(
+            show = showEndDatePicker,
+            onDismissRequest = { showEndDatePicker = false },
+            onDateTimeSelected = { endDateTime = it }
+        )
 
         Column {
-            // header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    itemsIndexed(templates) { i, it ->
-                        EventTemplateButton(
-                            text = it,
-                            onClick = { selectedTemplate = i },
-                            selected = i == selectedTemplate
-                        )
-                    }
-                }
+            BadgeList(
+                items = templates,
+                selectedItem = selectedTemplate,
+                onChange = { selectedTemplate = it },
+                displayText = { it },
+            )
 
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(end = 4.dp)
-                )
-            }
-
-            // form fields
             val transparentTextFieldColors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
-                errorBorderColor = Color.Transparent
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             )
+
             Column {
                 Spacer(modifier = Modifier.height(16.dp))
+
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    placeholder = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Create, contentDescription = "Date")
+                    value = title,
+                    onValueChange = {
+                        title = it
+                        titleError = null
                     },
-                    colors = transparentTextFieldColors
-                )
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    placeholder = { Text("Description") },
+                    isError = titleError != null,
+                    placeholder = { Text("Title...") },
                     modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Menu, contentDescription = "Date")
-                    },
+                    leadingIcon = { Icon(Icons.Default.Create, contentDescription = "Title") },
                     colors = transparentTextFieldColors
                 )
 
-                HorizontalDivider()
+                if (titleError != null) {
+                    Text(
+                        text = titleError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                    )
+                }
 
-                Row(
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    placeholder = { Text("Description...") },
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    TextButton(
-                        onClick = { showDatePicker = true }
-                    ) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Calendar")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start Date")
-                    }
-                    Spacer(modifier = Modifier.width(64.dp))
-                    TextButton(
-                        onClick = { showDatePicker = true }
-                    ) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Calendar")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("End Date")
-                    }
+                    leadingIcon = { Icon(Icons.Default.Menu, contentDescription = "Description") },
+                    colors = transparentTextFieldColors
+                )
+
+                OutlinedTextField(
+                    value = type,
+                    onValueChange = {
+                        type = it
+                        typeError = null
+                    },
+                    isError = typeError != null,
+                    placeholder = { Text("Event Type...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = "Event Type") },
+                    colors = transparentTextFieldColors
+                )
+
+                if (typeError != null) {
+                    Text(
+                        text = typeError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                    )
                 }
 
                 HorizontalDivider()
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        placeholder = { Text("Location") },
-                        modifier = Modifier.weight(3f),
-                        leadingIcon = {
-                            Icon(Icons.Default.LocationOn, contentDescription = "Date")
-                        },
-                        colors = transparentTextFieldColors
+                    TextButton(onClick = { showStartDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Calendar")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(startDateTime?.format(dateTimerFormatter) ?: "Start Date")
+                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "To",
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = 4.dp)
+                            .size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     )
-                    var isRepeat by remember { mutableStateOf(false) }
-                    Text("Repeat")
+                    TextButton(onClick = { showEndDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Calendar")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(endDateTime?.format(dateTimerFormatter) ?: "End Date")
+                    }
+                }
+                if (dateError != null) {
+                    Text(
+                        text = dateError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                    )
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+                ) {
                     Switch(
-                        modifier = Modifier.weight(1f),
                         checked = isRepeat,
-                        onCheckedChange = { isRepeat = it }
+                        onCheckedChange = { isRepeat = it },
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Repeat Weekly")
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = {
+                            var valid = true
+                            titleError = null
+                            typeError = null
+                            dateError = null
+
+                            if (title.isBlank()) {
+                                titleError = "Title is required"
+                                valid = false
+                            }
+                            if (type.isBlank()) {
+                                typeError = "Event type is required"
+                                valid = false
+                            }
+                            if (startDateTime == null || endDateTime == null) {
+                                dateError = "Please select both start and end dates"
+                                valid = false
+                            } else if (endDateTime!!.isBefore(startDateTime)) {
+                                dateError = "End date must be after start date"
+                                valid = false
+                            } else {
+                                dateError = null
+                            }
+
+                            if (valid && startDateTime != null && endDateTime != null) {
+                                onCreateEvent(
+                                    EventFormData(
+                                        title = title,
+                                        description = description,
+                                        type = type,
+                                        startDateTime = startDateTime!!,
+                                        endDateTime = endDateTime!!,
+                                        isRepeat = isRepeat,
+                                    )
+                                )
+                            }
+                        },
+                    ) {
+                        Text("Create Event")
+                    }
                 }
 
-                HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = {},
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Create Event")
-                }
             }
         }
     }
