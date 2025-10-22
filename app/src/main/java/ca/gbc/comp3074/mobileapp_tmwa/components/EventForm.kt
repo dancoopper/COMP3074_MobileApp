@@ -49,33 +49,6 @@ import com.example.compose.AppTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@Composable
-fun EventTemplateButton(
-    text: String,
-    onClick: () -> Unit,
-    selected: Boolean = false,
-) {
-    Box(
-        modifier = Modifier
-            .background(
-                color =
-                    if (selected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceDim,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable(onClick = onClick)
-    ) {
-        Text(
-            text,
-            color =
-                if (selected) MaterialTheme.colorScheme.onPrimary
-                else MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
-            modifier = Modifier.padding(10.dp, 4.dp),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-    }
-}
-
 data class EventFormData(
     val title: String,
     val description: String,
