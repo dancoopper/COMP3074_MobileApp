@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,13 +25,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ca.gbc.comp3074.mobileapp_tmwa.data.AuthResult
+import ca.gbc.comp3074.mobileapp_tmwa.data.SupabaseAuth
 import com.example.compose.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(onRegisterDone: () -> Unit) {
@@ -39,6 +44,9 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var loading by remember { mutableStateOf(false) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -125,13 +133,37 @@ fun RegisterScreen(onRegisterDone: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = onRegisterDone,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Register")
+//                    Button(
+//                        onClick = onRegisterDone,
+//                        modifier = Modifier.fillMaxWidth(),
+//                        shape = RoundedCornerShape(8.dp)
+//                    ) {
+//                        Text("Register")
+//                    }
+
+                    Button(enabled = !loading, onClick = {
+                        loading = true
+                        errorMsg = null
+                        scope.launch {
+                            when (val res = SupabaseAuth.signUp(email.trim(), password)) {
+                                is AuthResult.Success -> {
+                                    loading = false
+                                    onRegisterDone()
+                                }
+                                is AuthResult.Error -> {
+                                    loading = false
+                                    errorMsg = res.message
+                                }
+                            }
+                        }
+                    }) {
+                        if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp)) else Text("ister")
                     }
+                    Text(
+                        text = errorMsg ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }

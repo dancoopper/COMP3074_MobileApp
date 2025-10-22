@@ -25,7 +25,7 @@ import com.example.compose.AppTheme
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+            super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme(darkTheme = true, dynamicColor = false) {

@@ -1,8 +1,20 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+val supabaseUrl = localProps.getProperty("SUPABASE_URL")?.trim() ?: ""
+val supabaseKey = localProps.getProperty("SUPABASE_KEY")?.trim() ?: ""
 
 android {
     namespace = "ca.gbc.comp3074.mobileapp_tmwa"
@@ -16,8 +28,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -36,6 +49,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
