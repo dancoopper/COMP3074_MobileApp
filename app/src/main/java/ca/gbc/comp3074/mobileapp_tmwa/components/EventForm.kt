@@ -54,21 +54,22 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun EventForm(
     onCreateEvent: (EventEntity) -> Unit,
+    initialEvent: EventEntity? = null
 ) {
     val templates = listOf("Default", "Task", "Schedule", "Meeting")
-    var selectedTemplate by remember { mutableStateOf("Default") }
+    var selectedTemplate by remember { mutableStateOf(if (initialEvent != null) initialEvent.type else "Default") }
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    var startDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
-    var endDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var startDateTime by remember { mutableStateOf<LocalDateTime?>(initialEvent?.startDateTime) }
+    var endDateTime by remember { mutableStateOf<LocalDateTime?>(initialEvent?.endDateTime) }
 
-    var isRepeat by remember { mutableStateOf(false) }
-    var type by remember { mutableStateOf("") }
+    var isRepeat by remember { mutableStateOf(initialEvent?.isRepeat ?: false) }
+    var type by remember { mutableStateOf(initialEvent?.type ?: "") }
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(initialEvent?.title ?: "") }
+    var description by remember { mutableStateOf(initialEvent?.description ?: "") }
 
     var titleError by remember { mutableStateOf<String?>(null) }
     var typeError by remember { mutableStateOf<String?>(null) }
@@ -77,15 +78,17 @@ fun EventForm(
     val dateTimerFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy\nhh:mm a")
 
     LaunchedEffect(selectedTemplate) {
-        type = when (selectedTemplate) {
-            "Default" -> ""
-            else -> selectedTemplate
-        }
+        if (initialEvent == null || selectedTemplate != initialEvent.type) {
+             type = when (selectedTemplate) {
+                "Default" -> ""
+                else -> selectedTemplate
+            }
 
-        isRepeat = when (selectedTemplate) {
-            "Schedule" -> true
-            "Default" -> isRepeat
-            else -> false
+            isRepeat = when (selectedTemplate) {
+                "Schedule" -> true
+                "Default" -> isRepeat
+                else -> false
+            }
         }
     }
 
@@ -283,7 +286,7 @@ fun EventForm(
                             }
                         },
                     ) {
-                        Text("Create Event")
+                        Text(if (initialEvent != null) "Update Event" else "Create Event")
                     }
                 }
 

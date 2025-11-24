@@ -13,4 +13,7 @@ interface EventDao {
 
     @Delete
     suspend fun deleteEvent(event: EventEntity)
+
+    @Update
+    suspend fun updateEvent(event: EventEntity)
 }
