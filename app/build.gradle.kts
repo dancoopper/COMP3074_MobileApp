@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 
@@ -79,4 +80,21 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+        // ... existing android/androidx dependencies ...
+
+        // 1. UNCOMMENT the BOM. This tells Gradle which versions to use.
+        implementation(platform("io.github.jan-tennert.supabase:bom:3.0.2"))
+
+        // 2. Supabase Modules (No version numbers needed now, BOM handles it)
+        implementation("io.github.jan-tennert.supabase:postgrest-kt")
+        implementation("io.github.jan-tennert.supabase:auth-kt")
+
+        // 3. Ktor Client (Required for networking)
+        implementation("io.ktor:ktor-client-android:3.0.1")
+
+        // 4. Serialization (CRITICAL: Supabase crashes without this)
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+
 }
