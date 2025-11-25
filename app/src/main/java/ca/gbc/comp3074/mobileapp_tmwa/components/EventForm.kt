@@ -3,6 +3,7 @@ package ca.gbc.comp3074.mobileapp_tmwa.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,6 +107,7 @@ fun EventForm(
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
             )
+            .clickable(enabled = true) {}
             .padding(16.dp),
         contentAlignment = Alignment.TopStart
     ) {
