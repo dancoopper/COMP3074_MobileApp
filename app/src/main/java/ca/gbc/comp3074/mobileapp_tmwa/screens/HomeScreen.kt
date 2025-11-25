@@ -59,11 +59,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-@SuppressLint("DefaultLocale")
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onProfileClick: () -> Unit = {}) {
+fun HomeScreen(onProfileClick: () -> Unit = {}, onShareClick: () -> Unit = {}) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEventForm by remember { mutableStateOf(false) }
@@ -98,14 +95,16 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
             HomeHeader(
                 date = selectedDate?.let {
                     if (it == LocalDate.now()) {
-                        "Today"
+                        val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM d")
+                        "Today, ${it.format(formatter)}"
                     } else {
                         val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, MMM d")
                         it.format(formatter)
                     }
                 }.toString(),
                 onProfileClick = onProfileClick,
-                onCalendarClick = { showDatePicker = true }
+                onCalendarClick = { showDatePicker = true },
+                onShareClick = onShareClick
             )
         },
         floatingActionButton = {

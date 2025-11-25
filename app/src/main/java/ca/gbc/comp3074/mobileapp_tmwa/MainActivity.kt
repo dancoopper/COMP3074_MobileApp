@@ -20,6 +20,7 @@ import ca.gbc.comp3074.mobileapp_tmwa.screens.ProfileScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.HomeScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.LoginScreen
 import ca.gbc.comp3074.mobileapp_tmwa.screens.RegisterScreen
+import ca.gbc.comp3074.mobileapp_tmwa.screens.ShareAvailabilityScreen
 import com.example.compose.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,6 +51,9 @@ fun MainScreen() {
             HomeScreen(
                 onProfileClick = {
                     navController.navigate(Screen.PROFILE.route)
+                },
+                onShareClick = {
+                    navController.navigate(Screen.SHARE_AVAILABILITY.route)
                 }
             )
         }
@@ -67,6 +71,11 @@ fun MainScreen() {
         composable(Screen.PROFILE.route) {
             ProfileScreen(
                 onNavigateHome = { navController.popBackStack(Screen.HOME.route, inclusive = false) }
+            )
+        }
+        composable(Screen.SHARE_AVAILABILITY.route) {
+            ShareAvailabilityScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }
