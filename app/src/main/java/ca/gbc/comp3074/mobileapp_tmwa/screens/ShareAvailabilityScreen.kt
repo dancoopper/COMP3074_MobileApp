@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -41,8 +42,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ca.gbc.comp3074.mobileapp_tmwa.AppDatabase
 import ca.gbc.comp3074.mobileapp_tmwa.domain.model.EventEntity
+import ca.gbc.comp3074.mobileapp_tmwa.utils.ParsedAvailability
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -56,10 +59,13 @@ fun ShareAvailabilityScreen(
     val eventDao = db.eventDao()
     
     var eventsForTheDay by remember { mutableStateOf(listOf<EventEntity>()) }
-    val selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     
     // Track selected available slots (by hour)
     var selectedSlots by remember { mutableStateOf(setOf<Int>()) }
+    
+    // Track imported availability for Overlap/Booking mode
+    var importedAvailability by remember { mutableStateOf<ParsedAvailability?>(null) }
 
     LaunchedEffect(selectedDate) {
         eventsForTheDay = getEventInRange(eventDao, selectedDate)
@@ -71,7 +77,12 @@ fun ShareAvailabilityScreen(
         val sortedSlots = selectedSlots.sorted()
         val dateStr = selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d"))
         val sb = StringBuilder()
-        sb.append("I'm available on $dateStr at:\n")
+        
+        if (importedAvailability == null) {
+            sb.append("I'm available on $dateStr at:\n")
+        } else {
+            sb.append("I'd like to book time on $dateStr at:\n")
+        }
         
         sortedSlots.forEach { hour ->
             sb.append("- ${String.format("%02d:00", hour)} to ${String.format("%02d:00", hour + 1)}\n")
@@ -82,17 +93,50 @@ fun ShareAvailabilityScreen(
             putExtra(Intent.EXTRA_TEXT, sb.toString())
             type = "text/plain"
         }
-        val shareIntent = Intent.createChooser(sendIntent, "Share Availability")
+        val title = if (importedAvailability == null) "Share Availability" else "Request Booking"
+        val shareIntent = Intent.createChooser(sendIntent, title)
         context.startActivity(shareIntent)
+    }
+
+    var showImportDialog by remember { mutableStateOf(false) }
+
+    if (showImportDialog) {
+        ca.gbc.comp3074.mobileapp_tmwa.components.ImportAvailabilityDialog(
+            onDismiss = { showImportDialog = false },
+            onAvailabilityParsed = { parsed ->
+                importedAvailability = parsed
+                selectedDate = parsed.date
+                selectedSlots = emptySet() // Reset selection
+                showImportDialog = false
+            }
+        )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Share Availability") },
+                title = { 
+                    Text(if (importedAvailability == null) "Share Availability" else "Book Time") 
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = {
+                        if (importedAvailability != null) {
+                            // Exit booking mode
+                            importedAvailability = null
+                            selectedDate = LocalDate.now()
+                            selectedSlots = emptySet()
+                        } else {
+                            onBackClick()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (importedAvailability == null) {
+                        androidx.compose.material3.TextButton(onClick = { showImportDialog = true }) {
+                            Text("Import")
+                        }
                     }
                 }
             )
@@ -100,7 +144,11 @@ fun ShareAvailabilityScreen(
         floatingActionButton = {
             if (selectedSlots.isNotEmpty()) {
                 FloatingActionButton(onClick = { shareAvailability() }) {
-                    Icon(Icons.Default.Share, contentDescription = "Share")
+                    if (importedAvailability == null) {
+                        Icon(Icons.Default.Share, contentDescription = "Share")
+                    } else {
+                        Icon(Icons.Default.Check, contentDescription = "Request Booking")
+                    }
                 }
             }
         }
@@ -118,7 +166,10 @@ fun ShareAvailabilityScreen(
             )
             
             Text(
-                text = "Tap available slots to select them for sharing.",
+                text = if (importedAvailability == null) 
+                    "Tap available slots to select them for sharing."
+                else 
+                    "Select a time slot to request a booking.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -131,11 +182,23 @@ fun ShareAvailabilityScreen(
             val endHour = 20
             
             for (hour in startHour..endHour) {
+                // Determine availability based on mode
+                var isImportedAvailable = true
+                if (importedAvailability != null) {
+                    // Check if this hour is in the imported list
+                    val hourStart = LocalTime.of(hour, 0)
+                    isImportedAvailable = importedAvailability!!.timeSlots.any { (start, end) ->
+                        !hourStart.isBefore(start) && hourStart.isBefore(end)
+                    }
+                }
+
                 AvailabilityHourSlot(
                     hour = hour,
                     events = eventsForTheDay,
                     date = selectedDate,
                     isSelected = selectedSlots.contains(hour),
+                    isImportedAvailable = isImportedAvailable,
+                    isBookingMode = importedAvailability != null,
                     onSlotClick = {
                         selectedSlots = if (selectedSlots.contains(hour)) {
                             selectedSlots - hour
@@ -158,6 +221,8 @@ fun AvailabilityHourSlot(
     events: List<EventEntity>,
     date: LocalDate,
     isSelected: Boolean,
+    isImportedAvailable: Boolean = true, // Default to true for Share mode
+    isBookingMode: Boolean = false,
     onSlotClick: () -> Unit
 ) {
     val hourStart = date.atTime(hour, 0)
@@ -182,7 +247,14 @@ fun AvailabilityHourSlot(
         (eventStart.isBefore(hourEnd) && eventEnd.isAfter(hourStart))
     }
     
-    val isBusy = overlappingEvents.isNotEmpty()
+    val isLocalBusy = overlappingEvents.isNotEmpty()
+    
+    // In Booking Mode (isImportedAvailable is relevant):
+    // - Available if: isImportedAvailable AND !isLocalBusy
+    // - Unavailable if: !isImportedAvailable OR isLocalBusy
+    
+    val isSlotAvailable = isImportedAvailable && !isLocalBusy
+    val isClickable = isSlotAvailable
 
     Row(
         modifier = Modifier
@@ -203,24 +275,31 @@ fun AvailabilityHourSlot(
                 .height(50.dp)
                 .background(
                     color = when {
-                        isBusy -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-                        isSelected -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
+                        isBookingMode && !isImportedAvailable -> MaterialTheme.colorScheme.surfaceVariant // Booking: Unavailable (Grey)
+                        isLocalBusy -> if (isBookingMode) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) // Busy/Conflict
+                        isSelected -> if (isBookingMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer // Selected
+                        else -> if (isBookingMode) Color.White else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f) // Available
                     },
                     shape = MaterialTheme.shapes.small
                 )
-                .clickable(enabled = !isBusy) { onSlotClick() },
+                .clickable(enabled = isClickable) { onSlotClick() },
             contentAlignment = Alignment.CenterStart
         ) {
-            if (isBusy) {
+            if (!isImportedAvailable) {
+                 Text(
+                    text = "Unavailable",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 12.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else if (isLocalBusy) {
                 Column(modifier = Modifier.padding(start = 12.dp)) {
                     Text(
-                        text = "Busy",
+                        text = if (isBookingMode) "Conflict" else "Busy",
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
-                    // Show first overlapping event title
                     Text(
                         text = overlappingEvents.first().title,
                         color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
@@ -232,8 +311,11 @@ fun AvailabilityHourSlot(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = if (isSelected) "Selected" else "Available",
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer 
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = when {
+                            isSelected -> if (isBookingMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
+                            isBookingMode -> Color.Black // White background -> Black text
+                            else -> MaterialTheme.colorScheme.onSecondaryContainer
+                        },
                         modifier = Modifier.padding(start = 12.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
