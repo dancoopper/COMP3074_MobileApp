@@ -95,7 +95,8 @@ fun HomeScreen(onProfileClick: () -> Unit = {}, onShareClick: () -> Unit = {}) {
             HomeHeader(
                 date = selectedDate?.let {
                     if (it == LocalDate.now()) {
-                        "Today"
+                        val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM d")
+                        "Today, ${it.format(formatter)}"
                     } else {
                         val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, MMM d")
                         it.format(formatter)
