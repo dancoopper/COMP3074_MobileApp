@@ -3,6 +3,8 @@ package ca.gbc.comp3074.mobileapp_tmwa.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -207,39 +209,48 @@ fun ProfileScreen(onNavigateHome: () -> Unit = {}) {
             Spacer(Modifier.height(32.dp))
 
             // Personal information section (edit or display mode)
-            if (isEditing) {
-                EditSection(
-                    fullName = editingFullName,
-                    username = editingUsername,
-                    dateOfBirth = editingDateOfBirth,
-                    gender = editingGender,
-                    profession = editingProfession,
-                    emailAddress = editingEmailAddress,
-                    phoneNumber = editingPhoneNumber,
-                    onFullNameChange = { editingFullName = it },
-                    onUsernameChange = { editingUsername = it },
-                    onDateOfBirthChange = { editingDateOfBirth = it },
-                    onGenderChange = { editingGender = it },
-                    onProfessionChange = { editingProfession = it },
-                    onEmailAddressChange = { editingEmailAddress = it },
-                    onPhoneNumberChange = { editingPhoneNumber = it },
-                    onSave = { saveChanges() },
-                    onCancel = { cancelChanges() },
-                    onDatePickerClick = { showDatePicker = true }
-                )
-            } else {
-                InfoSectionCompact(
-                    title = "Personal Information",
-                    information = listOf(
-                        "Full Name" to savedFullName,
-                        "Username" to savedUsername,
-                        "Date of Birth" to savedDateOfBirth,
-                        "Gender" to savedGender,
-                        "Profession" to savedProfession,
-                        "Email Address" to savedEmailAddress,
-                        "Phone Number" to savedPhoneNumber
+            AnimatedContent(
+                targetState = isEditing,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) + slideInVertically(animationSpec = tween(300)) { it / 10 } togetherWith
+                            fadeOut(animationSpec = tween(300)) + slideOutVertically(animationSpec = tween(300)) { -it / 10 }
+                },
+                label = "Edit Mode Transition"
+            ) { editing ->
+                if (editing) {
+                    EditSection(
+                        fullName = editingFullName,
+                        username = editingUsername,
+                        dateOfBirth = editingDateOfBirth,
+                        gender = editingGender,
+                        profession = editingProfession,
+                        emailAddress = editingEmailAddress,
+                        phoneNumber = editingPhoneNumber,
+                        onFullNameChange = { editingFullName = it },
+                        onUsernameChange = { editingUsername = it },
+                        onDateOfBirthChange = { editingDateOfBirth = it },
+                        onGenderChange = { editingGender = it },
+                        onProfessionChange = { editingProfession = it },
+                        onEmailAddressChange = { editingEmailAddress = it },
+                        onPhoneNumberChange = { editingPhoneNumber = it },
+                        onSave = { saveChanges() },
+                        onCancel = { cancelChanges() },
+                        onDatePickerClick = { showDatePicker = true }
                     )
-                )
+                } else {
+                    InfoSectionCompact(
+                        title = "Personal Information",
+                        information = listOf(
+                            "Full Name" to savedFullName,
+                            "Username" to savedUsername,
+                            "Date of Birth" to savedDateOfBirth,
+                            "Gender" to savedGender,
+                            "Profession" to savedProfession,
+                            "Email Address" to savedEmailAddress,
+                            "Phone Number" to savedPhoneNumber
+                        )
+                    )
+                }
             }
 
             Spacer(Modifier.height(32.dp))

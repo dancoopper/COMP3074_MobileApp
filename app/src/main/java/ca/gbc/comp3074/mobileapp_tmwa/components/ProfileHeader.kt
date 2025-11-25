@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
@@ -34,27 +35,38 @@ fun ProfileHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        MaterialTheme.colorScheme.surface
+            .height(280.dp) // Increased height
+    ) {
+        // Background with curve
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
                 )
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box {
-            // Profile picture  with subtle border
+        )
+
+        // Profile Image Container
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = 20.dp) // Push down to overlap
+        ) {
             Box(
                 modifier = Modifier
-                    .size(130.dp)
+                    .size(140.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface)
                     .border(
-                        width = 3.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        width = 4.dp,
+                        color = MaterialTheme.colorScheme.surface,
                         shape = CircleShape
                     )
                     .clickable(enabled = isEditing) { showDialog = true },
@@ -73,29 +85,30 @@ fun ProfileHeader(
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Default Profile Picture",
-                        modifier = Modifier.size(70.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        modifier = Modifier.size(80.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                 }
             }
 
-            // Edit icon when editing
+            // Edit Badge
             if (isEditing) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .offset(x = (-8).dp, y = (-8).dp)
-                        .size(40.dp)
+                        .offset(x = (-4).dp, y = (-4).dp)
+                        .size(36.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(MaterialTheme.colorScheme.tertiary)
+                        .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
                         .clickable { showDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Change Picture",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(20.dp)
+                        tint = MaterialTheme.colorScheme.onTertiary,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
