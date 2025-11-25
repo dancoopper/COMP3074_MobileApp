@@ -248,6 +248,15 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
             }
 
             if (showEventForm) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                        .clickable {
+                            showEventForm = false
+                            eventToEdit = null
+                        }
+                )
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {
                     EventForm(
                         initialEvent = eventToEdit,
@@ -280,7 +289,8 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                                 }
                                 showEventForm = false
                                 eventToEdit = null
-                                eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
+                                eventsForTheDay =
+                                    getEventInRange(eventDao, selectedDate ?: LocalDate.now())
                             }
                         }
                     )
