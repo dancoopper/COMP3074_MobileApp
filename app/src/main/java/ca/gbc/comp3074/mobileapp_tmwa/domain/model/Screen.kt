@@ -8,6 +8,7 @@ enum class Screen(
     LOGIN(route = "login", title = "Login"),
     REGISTER(route = "register", title = "Register"),
     PROFILE(route = "profile", title = "Profile"),
+    SHARE_AVAILABILITY(route = "share_availability", title = "Share Availability"),
 
 
 }

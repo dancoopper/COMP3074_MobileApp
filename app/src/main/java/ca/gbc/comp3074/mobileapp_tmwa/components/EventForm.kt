@@ -318,7 +318,8 @@ fun EventFormPreview() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     HomeHeader(
                         onProfileClick = {},
-                        onCalendarClick = {}
+                        onCalendarClick = {},
+                        onShareClick = {}
                     )
                 }
 

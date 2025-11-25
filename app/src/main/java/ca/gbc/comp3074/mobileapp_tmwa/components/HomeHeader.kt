@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +32,7 @@ fun HomeHeader(
     date: String = "Today",
     onProfileClick: () -> Unit,
     onCalendarClick: () -> Unit,
+    onShareClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -72,6 +74,15 @@ fun HomeHeader(
                     tint = MaterialTheme.colorScheme.secondary,
                 )
             }
+            IconButton(
+                onClick = onShareClick
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Share,
+                    contentDescription = "Share",
+                    tint = MaterialTheme.colorScheme.secondary,
+                )
+            }
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
@@ -97,6 +108,7 @@ fun HomeHeader(
 fun HomeHeaderPreview() {
     HomeHeader(
         onProfileClick = {},
-        onCalendarClick = {}
+        onCalendarClick = {},
+        onShareClick = {}
     )
 }
