@@ -41,161 +41,165 @@ fun EditSection(
     var genderExpanded by remember { mutableStateOf(false) }
     val genderOptions = listOf("Male", "Female", "Prefer not to say")
 
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp)
     ) {
-        Text(
-            text = "Personal Information",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        OutlinedTextField(
-            value = fullName,
-            onValueChange = onFullNameChange,
-            label = { Text("Full Name") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = onUsernameChange,
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        // Date of Birth with Calendar Icon to change DoB
-        OutlinedTextField(
-            value = dateOfBirth,
-            onValueChange = { },
-            label = { Text("Date of Birth") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = onDatePickerClick) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Select Date"
-                    )
-                }
-            }
-        )
-
-        // Dropdown table for gender ---> Male / Female / Prefer not to say line 42 options
-        ExposedDropdownMenuBox(
-            expanded = genderExpanded,
-            onExpandedChange = { genderExpanded = it }
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text(
+                text = "Personal Information",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
             OutlinedTextField(
-                value = gender,
+                value = fullName,
+                onValueChange = onFullNameChange,
+                label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = onUsernameChange,
+                label = { Text("Username") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            // Date of Birth with Calendar Icon to change DoB
+            OutlinedTextField(
+                value = dateOfBirth,
                 onValueChange = { },
-                label = { Text("Gender") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                label = { Text("Date of Birth") },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 readOnly = true,
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Select Gender"
-                    )
+                    IconButton(onClick = onDatePickerClick) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Select Date"
+                        )
+                    }
                 }
             )
 
-            ExposedDropdownMenu(
+            // Dropdown table for gender ---> Male / Female / Prefer not to say line 42 options
+            ExposedDropdownMenuBox(
                 expanded = genderExpanded,
-                onDismissRequest = { genderExpanded = false }
+                onExpandedChange = { genderExpanded = it }
             ) {
-                genderOptions.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            onGenderChange(option)
-                            genderExpanded = false
-                        }
-                    )
+                OutlinedTextField(
+                    value = gender,
+                    onValueChange = { },
+                    label = { Text("Gender") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    shape = RoundedCornerShape(12.dp),
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Select Gender"
+                        )
+                    }
+                )
+
+                ExposedDropdownMenu(
+                    expanded = genderExpanded,
+                    onDismissRequest = { genderExpanded = false }
+                ) {
+                    genderOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                onGenderChange(option)
+                                genderExpanded = false
+                            }
+                        )
+                    }
                 }
             }
-        }
 
-        OutlinedTextField(
-            value = profession,
-            onValueChange = onProfessionChange,
-            label = { Text("Profession") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
+            OutlinedTextField(
+                value = profession,
+                onValueChange = onProfessionChange,
+                label = { Text("Profession") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
 
-        OutlinedTextField(
-            value = emailAddress,
-            onValueChange = onEmailAddressChange,
-            label = { Text("Email Address") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
+            OutlinedTextField(
+                value = emailAddress,
+                onValueChange = onEmailAddressChange,
+                label = { Text("Email Address") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
 
-        // Phone Number with +1 (XXX) XXX-XXXX formatting
-        OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = { newValue ->
-                // Remove all non-digit characters basically I want numbers
-                val digitsOnly = newValue.filter { it.isDigit() }
+            // Phone Number with +1 (XXX) XXX-XXXX formatting
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { newValue ->
+                    // Remove all non-digit characters basically I want numbers
+                    val digitsOnly = newValue.filter { it.isDigit() }
 
-                // Format the phone number with country code
-                val formatted = when {
-                    digitsOnly.isEmpty() -> ""
-                    digitsOnly.length <= 3 -> "+1 (${digitsOnly}"
-                    digitsOnly.length <= 6 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}"
-                    digitsOnly.length <= 10 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}"
-                    else -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}"
+                    // Format the phone number with country code
+                    val formatted = when {
+                        digitsOnly.isEmpty() -> ""
+                        digitsOnly.length <= 3 -> "+1 (${digitsOnly}"
+                        digitsOnly.length <= 6 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}"
+                        digitsOnly.length <= 10 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}"
+                        else -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}"
+                    }
+
+                    onPhoneNumberChange(formatted)
+                },
+                label = { Text("Phone Number") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                placeholder = { Text("+1 (416) 555-7842") }
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Save and Cancel buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onCancel,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Cancel", style = MaterialTheme.typography.bodyLarge)
                 }
 
-                onPhoneNumberChange(formatted)
-            },
-            label = { Text("Phone Number") },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            placeholder = { Text("+1 (416) 555-7842") }
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Save and Cancel buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = onCancel,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Cancel", style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Button(
-                onClick = onSave,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Save Changes", style = MaterialTheme.typography.bodyLarge)
+                Button(
+                    onClick = onSave,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Save", style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
     }
