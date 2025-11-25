@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.max
 import ca.gbc.comp3074.mobileapp_tmwa.AppDatabase
 import ca.gbc.comp3074.mobileapp_tmwa.components.CustomDatePicker
 import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
+import ca.gbc.comp3074.mobileapp_tmwa.components.EventDetailDialog
 import ca.gbc.comp3074.mobileapp_tmwa.components.HomeHeader
 import ca.gbc.comp3074.mobileapp_tmwa.components.TimeTickIndicator
 import ca.gbc.comp3074.mobileapp_tmwa.dao.EventDao
@@ -66,6 +67,8 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showEventForm by remember { mutableStateOf(false) }
+    var selectedEvent by remember { mutableStateOf<EventEntity?>(null) }
+    var eventToEdit by remember { mutableStateOf<EventEntity?>(null) }
 
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
 
@@ -106,7 +109,14 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showEventForm = !showEventForm }) {
+            FloatingActionButton(onClick = { 
+                if (showEventForm) {
+                    showEventForm = false
+                    eventToEdit = null
+                } else {
+                    showEventForm = true
+                }
+            }) {
                 if (!showEventForm) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 } else {
@@ -128,6 +138,25 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                     }
                 }
             )
+
+            if (selectedEvent != null) {
+                EventDetailDialog(
+                    event = selectedEvent!!,
+                    onDismiss = { selectedEvent = null },
+                    onDelete = {
+                        coroutineScope.launch {
+                            eventDao.deleteEvent(selectedEvent!!)
+                            selectedEvent = null
+                            eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
+                        }
+                    },
+                    onEdit = {
+                        eventToEdit = selectedEvent
+                        selectedEvent = null
+                        showEventForm = true
+                    }
+                )
+            }
 
             BoxWithConstraints(
                 modifier = Modifier
@@ -198,10 +227,7 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
                                 }
                             )
                             .clickable(onClick = {
-                                coroutineScope.launch {
-                                    eventDao.deleteEvent(event)
-                                    eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
-                                }
+                                selectedEvent = event
                             }),
                     ) {
                         Row(
@@ -224,19 +250,36 @@ fun HomeScreen(onProfileClick: () -> Unit = {}) {
             if (showEventForm) {
                 Column(modifier = Modifier.align(Alignment.BottomCenter)) {
                     EventForm(
+                        initialEvent = eventToEdit,
                         onCreateEvent = { formData ->
-                            val event = EventEntity(
-                                title = formData.title,
-                                description = formData.description,
-                                type = formData.type,
-                                startDateTime = formData.startDateTime,
-                                endDateTime = formData.endDateTime,
-                                isRepeat = formData.isRepeat
-                            )
+                            val event = if (eventToEdit != null) {
+                                eventToEdit!!.copy(
+                                    title = formData.title,
+                                    description = formData.description,
+                                    type = formData.type,
+                                    startDateTime = formData.startDateTime,
+                                    endDateTime = formData.endDateTime,
+                                    isRepeat = formData.isRepeat
+                                )
+                            } else {
+                                EventEntity(
+                                    title = formData.title,
+                                    description = formData.description,
+                                    type = formData.type,
+                                    startDateTime = formData.startDateTime,
+                                    endDateTime = formData.endDateTime,
+                                    isRepeat = formData.isRepeat
+                                )
+                            }
 
                             coroutineScope.launch {
-                                eventDao.insertEvent(event)
+                                if (eventToEdit != null) {
+                                    eventDao.updateEvent(event)
+                                } else {
+                                    eventDao.insertEvent(event)
+                                }
                                 showEventForm = false
+                                eventToEdit = null
                                 eventsForTheDay = getEventInRange(eventDao, selectedDate ?: LocalDate.now())
                             }
                         }

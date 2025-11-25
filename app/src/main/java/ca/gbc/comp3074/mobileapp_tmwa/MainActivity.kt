@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.LOGIN.route) {
+    NavHost(navController = navController, startDestination = Screen.HOME.route) {
         composable(Screen.HOME.route) {
             HomeScreen(
                 onProfileClick = {
