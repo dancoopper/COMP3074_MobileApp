@@ -165,8 +165,20 @@ fun AvailabilityHourSlot(
     
     // Check if any event overlaps with this hour
     val overlappingEvents = events.filter { event ->
-        val eventStart = event.startDateTime
-        val eventEnd = event.endDateTime
+        val eventStart = if (event.isRepeat) {
+            date.atTime(event.startDateTime.toLocalTime())
+        } else {
+            event.startDateTime
+        }
+        
+        val eventEnd = if (event.isRepeat) {
+            // Calculate duration to correctly handle end time
+            val duration = java.time.Duration.between(event.startDateTime, event.endDateTime)
+            eventStart.plus(duration)
+        } else {
+            event.endDateTime
+        }
+        
         (eventStart.isBefore(hourEnd) && eventEnd.isAfter(hourStart))
     }
     
