@@ -1,6 +1,5 @@
 package ca.gbc.comp3074.mobileapp_tmwa.screens
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -21,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,8 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import ca.gbc.comp3074.mobileapp_tmwa.AppDatabase
 import ca.gbc.comp3074.mobileapp_tmwa.components.CustomDatePicker
-import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
 import ca.gbc.comp3074.mobileapp_tmwa.components.EventDetailDialog
+import ca.gbc.comp3074.mobileapp_tmwa.components.EventForm
 import ca.gbc.comp3074.mobileapp_tmwa.components.HomeHeader
 import ca.gbc.comp3074.mobileapp_tmwa.components.TimeTickIndicator
 import ca.gbc.comp3074.mobileapp_tmwa.dao.EventDao
@@ -59,6 +57,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(onProfileClick: () -> Unit = {}, onShareClick: () -> Unit = {}) {
     var showDatePicker by remember { mutableStateOf(false) }
