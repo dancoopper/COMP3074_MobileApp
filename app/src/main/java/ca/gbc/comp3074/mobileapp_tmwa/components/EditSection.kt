@@ -149,29 +149,19 @@ fun EditSection(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
-            // Phone Number with +1 (XXX) XXX-XXXX formatting
+            // Phone Number (Numbers only)
             OutlinedTextField(
                 value = phoneNumber,
                 onValueChange = { newValue ->
-                    // Remove all non-digit characters basically I want numbers
+                    // Remove all non-digit characters
                     val digitsOnly = newValue.filter { it.isDigit() }
-
-                    // Format the phone number with country code
-                    val formatted = when {
-                        digitsOnly.isEmpty() -> ""
-                        digitsOnly.length <= 3 -> "+1 (${digitsOnly}"
-                        digitsOnly.length <= 6 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}"
-                        digitsOnly.length <= 10 -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}"
-                        else -> "+1 (${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}"
-                    }
-
-                    onPhoneNumberChange(formatted)
+                    onPhoneNumberChange(digitsOnly)
                 },
                 label = { Text("Phone Number") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                placeholder = { Text("+1 (416) 555-7842") }
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                placeholder = { Text("4165557842") }
             )
 
             Spacer(Modifier.height(8.dp))
