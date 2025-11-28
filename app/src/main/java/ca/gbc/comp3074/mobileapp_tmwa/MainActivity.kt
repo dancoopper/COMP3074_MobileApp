@@ -70,7 +70,11 @@ fun MainScreen() {
         }
         composable(Screen.PROFILE.route) {
             ProfileScreen(
-                onNavigateHome = { navController.popBackStack(Screen.HOME.route, inclusive = false) }
+                onNavigateHome = {
+                    navController.navigate(Screen.LOGIN.route) {
+                        popUpTo(Screen.HOME.route) { inclusive = true }
+                    }
+                }
             )
         }
         composable(Screen.SHARE_AVAILABILITY.route) {

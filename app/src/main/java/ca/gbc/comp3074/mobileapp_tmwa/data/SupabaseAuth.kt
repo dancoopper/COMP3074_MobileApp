@@ -139,6 +139,16 @@ object SupabaseAuth {
             }
         }
     }
+
+    suspend fun signOut() {
+        withContext(Dispatchers.IO) {
+            try {
+                supabase.auth.signOut()
+            } catch (e: Exception) {
+                Log.e("SupabaseAuth", "SignOut Error", e)
+            }
+        }
+    }
 }
 
 

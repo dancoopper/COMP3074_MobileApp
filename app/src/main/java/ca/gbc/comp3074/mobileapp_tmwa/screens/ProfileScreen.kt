@@ -25,6 +25,7 @@ import ca.gbc.comp3074.mobileapp_tmwa.components.InfoSectionCompact
 import ca.gbc.comp3074.mobileapp_tmwa.components.ProfileHeader
 import ca.gbc.comp3074.mobileapp_tmwa.data.ProfileRepository
 import ca.gbc.comp3074.mobileapp_tmwa.data.ProfileUi
+import ca.gbc.comp3074.mobileapp_tmwa.data.SupabaseAuth
 import com.example.compose.AppTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -253,6 +254,22 @@ fun ProfileScreen(onNavigateHome: () -> Unit = {}) {
                 }
             }
 
+            Spacer(Modifier.height(32.dp))
+
+            // Logout Button
+            Button(
+                onClick = {
+                    scope.launch {
+                        SupabaseAuth.signOut()
+                        onNavigateHome()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.fillMaxWidth(0.8f)
+            ) {
+                Text("Logout")
+            }
+            
             Spacer(Modifier.height(32.dp))
         }
     }
